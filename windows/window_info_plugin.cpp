@@ -9,6 +9,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 namespace window_info {
 
@@ -165,7 +167,19 @@ void WindowInfoPlugin::HandleMethodCall(
         HWND hwnd = FindWindowByPartialTitle(title);
         
         if (hwnd) {
-          BOOL success = SetWindowPos(hwnd, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+          if (!IsWindow(hwnd)) {
+            result->Success(flutter::EncodableValue(false));
+            return;
+          }
+          
+          if (!IsWindowVisible(hwnd)) {
+            ShowWindow(hwnd, SW_SHOW);
+          }
+          
+          SetForegroundWindow(hwnd);
+          
+          BOOL success = SetWindowPos(hwnd, HWND_TOP, x, y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE);
+          
           result->Success(flutter::EncodableValue(success != 0));
           return;
         }
@@ -187,7 +201,19 @@ void WindowInfoPlugin::HandleMethodCall(
         HWND hwnd = FindWindowByPartialTitle(title);
         
         if (hwnd) {
-          BOOL success = SetWindowPos(hwnd, NULL, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER);
+          if (!IsWindow(hwnd)) {
+            result->Success(flutter::EncodableValue(false));
+            return;
+          }
+          
+          if (!IsWindowVisible(hwnd)) {
+            ShowWindow(hwnd, SW_SHOW);
+          }
+          
+          SetForegroundWindow(hwnd);
+          
+          BOOL success = SetWindowPos(hwnd, HWND_TOP, 0, 0, width, height, SWP_NOMOVE | SWP_NOACTIVATE);
+          
           result->Success(flutter::EncodableValue(success != 0));
           return;
         }
